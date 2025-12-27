@@ -1,0 +1,101 @@
+type Dog {
+    id: ID!
+    name: String
+    age: Int
+    breed: DogBreed
+    color: String
+    favouriteFood: [Food]
+    owner: Owner
+}
+
+type Owner {
+    id: ID!
+    firstName: String
+    lastName: String
+    age: Int
+    dogs: [Dog!]!
+}
+
+type DogPage {
+    content: [Dog!]!
+    totalElements: Int!
+    totalPages: Int!
+    pageNumber: Int!
+    pageSize: Int!
+}
+
+type OwnerPage {
+    content: [Owner!]!
+    totalElements: Int!
+    totalPages: Int!
+    pageNumber: Int!
+    pageSize: Int!
+}
+
+type AuthPayload {
+    token: String!
+    user: String!
+}
+
+input DogInput {
+    name: String!
+    age: Int!
+    breed: DogBreed!
+    color: String!
+    favouriteFood: [Food!]!
+    ownerId: ID
+}
+
+input OwnerInput {
+    firstName: String!
+    lastName: String!
+    age: Int!
+}
+
+enum DogBreed {
+    HUSKY
+    AMSTAFF
+    GERMAN_SHEPERD
+    TERRIER
+    DOBERMAN
+    CANE_CORSO
+    ROTTWEILER
+    DASCHUND
+    PUG
+    BICHON
+    GOLDEN_RETRIEVER
+    GREAT_DANE
+    PITBULL
+    MASTIFF
+    SHIBA_INU
+    DOGO_ARGENTINO
+    BULLDOG
+    LABRADOR
+    BEAGLE
+    CHIHUAHUA
+    POODLE
+    COLLIE
+    BOXER
+    CHOW_CHOW
+    ST_BERNARD
+    POMERANIAN
+    COCKEL
+}
+
+enum Food {
+    CHICKEN
+    BEEF
+    TURKEY
+    SALMON
+    CHEESE
+    APPLES
+    BANANAS
+    BLUEBERRIES
+    STRAWBERRIES
+    WATERMELON
+    SWEETPOTATO
+    YOGURT
+    PEANUTBUTTER
+}
+
+

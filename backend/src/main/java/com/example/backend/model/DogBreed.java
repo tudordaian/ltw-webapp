@@ -1,0 +1,31 @@
+package com.example.backend.model;
+
+public enum DogBreed {
+    HUSKY,
+    AMSTAFF,
+    GERMAN_SHEPERD,
+    TERRIER,
+    DOBERMAN,
+    CANE_CORSO,
+    ROTTWEILER,
+    DASCHUND,
+    PUG,
+    BICHON,
+    GOLDEN_RETRIEVER,
+    GREAT_DANE,
+    PITBULL,
+    MASTIFF,
+    SHIBA_INU,
+    DOGO_ARGENTINO,
+    BULLDOG,
+    LABRADOR,
+    BEAGLE,
+    CHIHUAHUA,
+    POODLE,
+    COLLIE,
+    BOXER,
+    CHOW_CHOW,
+    ST_BERNARD,
+    POMERANIAN,
+    COCKEL
+}
