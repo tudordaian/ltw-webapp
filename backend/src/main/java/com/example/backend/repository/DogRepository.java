@@ -2,6 +2,8 @@ package com.example.backend.repository;
 
 import com.example.backend.entity.Dog;
 import com.example.backend.types.DogBreed;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -11,4 +13,5 @@ import java.util.List;
 public interface DogRepository extends JpaRepository<Dog, Long> {
     List<Dog> findByBreed(DogBreed breed);
     List<Dog> findByColor(String data);
+    Page<Dog> findAll(Pageable pageable);
 }
