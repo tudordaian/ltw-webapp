@@ -1,4 +1,4 @@
-package com.example.backend.model;
+package com.example.backend.types;
 
 public enum DogBreed {
     HUSKY,
