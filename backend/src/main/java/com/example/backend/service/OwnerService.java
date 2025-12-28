@@ -2,6 +2,7 @@ package com.example.backend.service;
 
 import com.example.backend.entity.Owner;
 import com.example.backend.repository.OwnerRepository;
+import com.example.backend.types.OwnerInput;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,6 +21,14 @@ public class OwnerService {
 
     public List<Owner> getAllOwners() {
         return ownerRepository.findAll();
+    }
+
+    public Owner addOwner(OwnerInput ownerInput) {
+        Owner owner = new Owner();
+        owner.setFirstName(ownerInput.getFirstName());
+        owner.setLastName(ownerInput.getLastName());
+        owner.setAge(ownerInput.getAge());
+        return ownerRepository.save(owner);
     }
 
     public Owner saveOwner(Owner owner) {

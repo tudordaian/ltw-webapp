@@ -101,10 +101,7 @@ type Query {
     # Lista de obiecte
     allDogs: [Dog!]!
     allOwners: [Owner!]!
-
-    # Lista de obiecte ce contin alte obiecte
     dogsWithOwners: [Dog!]!
-    ownersWithDogs: [Owner!]!
 
     # Lista filtrata
     dogsByBreed(breed: DogBreed!): [Dog!]!
@@ -112,17 +109,15 @@ type Query {
 
     # Lista paginata
     dogsPaginated(page: Int!, size: Int!): DogPage!
-    ownersPaginated(page: Int!, size: Int!): OwnerPage!
 }
 
 type Mutation {
     login(username: String!, password: String!): Boolean!
     addDog(input: DogInput!): Dog!
-    addOwner(input: OwnerInput!): Owner!
     updateDog(id: ID!, input: DogInput!): Dog!
-    updateOwner(id: ID!, input: OwnerInput!): Owner!
     deleteDog(id: ID!): Boolean!
-    deleteOwner(id: ID!): Boolean!
+    addOwner(input: OwnerInput!): Owner!
+    assignDogToOwner(dogId: ID!, ownerId: ID!): Dog!
 }
 
 
