@@ -45,8 +45,10 @@ function App() {
 
   const [activeTab, setActiveTab] = useState('dogs');
 
+  // Fetch all dogs
   const fetchDogs = async () => {
     setLoading(true); setError(null); setMessage('');
+    setSingleDog(null); setOwnersDogs([]); setPaginated(null); // Clear other results
     try {
       const response = await fetch('http://localhost:8080/graphql', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -103,6 +105,7 @@ function App() {
   // Fetch dogs with owners
   const fetchDogsWithOwners = async () => {
     setLoading(true); setError(null); setMessage('');
+    setDogs([]); setSingleDog(null); setPaginated(null); // Clear other results
     try {
       const response = await fetch('http://localhost:8080/graphql', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -111,6 +114,23 @@ function App() {
       const result = await response.json();
       setOwnersDogs(result.data.dogsWithOwners);
     } catch (err) { setError('Failed to fetch dogs with owners'); }
+    finally { setLoading(false); }
+  };
+
+  // Fetch dogs with no owner
+  const fetchDogsNoOwner = async () => {
+    setLoading(true); setError(null); setMessage('');
+    setDogs([]); setSingleDog(null); setOwnersDogs([]); setPaginated(null); // Clear other results
+    try {
+      const response = await fetch('http://localhost:8080/graphql', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: '{ allDogs { id name breed color owner { id } } }' })
+      });
+      const result = await response.json();
+      // Filter dogs with no owner
+      const noOwner = result.data.allDogs.filter(dog => !dog.owner);
+      setDogsNoOwner(noOwner);
+    } catch (err) { setError('Failed to fetch dogs with no owners'); }
     finally { setLoading(false); }
   };
 
@@ -238,6 +258,8 @@ function App() {
     finally { setLoading(false); }
   };
 
+  const [dogsNoOwner, setDogsNoOwner] = useState([]);
+
   return (
     <div style={{ minHeight: '100vh', background: 'linear-gradient(120deg, #f0f4f8 0%, #e0e7ef 100%)', display: 'flex', flexDirection: 'column', alignItems: 'center', fontFamily: 'Segoe UI, Arial, sans-serif' }}>
       <header style={{ width: '100%', maxWidth: 700, margin: '2em auto 1em auto', textAlign: 'center' }}>
@@ -262,6 +284,7 @@ function App() {
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5em', marginBottom: '1em' }}>
                 <button onClick={fetchDogs} disabled={loading}>All Dogs</button>
                 <button onClick={fetchDogsWithOwners} disabled={loading}>With Owners</button>
+                <button onClick={fetchDogsNoOwner} disabled={loading}>No Owner</button>
                 <button onClick={fetchDogsPaginated} disabled={loading}>Paginated</button>
               </div>
               <div style={{ display: 'flex', gap: '0.5em', marginBottom: '0.5em' }}>
@@ -276,17 +299,14 @@ function App() {
                 <input placeholder="Color" value={color} onChange={e => setColor(e.target.value)} style={{flex:1}} />
                 <button onClick={fetchDogsByColor} disabled={loading}>By Color</button>
               </div>
-              <div style={{ display: 'flex', gap: '0.5em', marginBottom: '0.5em' }}>
-                <input placeholder="Page" type="number" value={page} onChange={e => setPage(e.target.value)} style={{width: '4em'}} />
-                <input placeholder="Size" type="number" value={size} onChange={e => setSize(e.target.value)} style={{width: '4em'}} />
-              </div>
+            </Section>
+            <Section title="Results">
               <div style={{marginTop: '1em'}}>
-                <strong>All Dogs:</strong>
-                <ul style={{listStyle: 'none', padding: 0}}>
-                  {dogs.map(dog => (
-                    <li key={dog.id} style={{background: '#f6f8fa', margin: '0.2em 0', padding: '0.5em', borderRadius: '5px'}}>{dog.name} ({dog.breed}, {dog.color})</li>
-                  ))}
-                </ul>
+                {dogs.length > 0 && <div><strong>All Dogs:</strong><ul style={{listStyle: 'none', padding: 0}}>{dogs.map(dog => (<li key={dog.id} style={{background: '#f6f8fa', margin: '0.2em 0', padding: '0.5em', borderRadius: '5px'}}><strong>ID:</strong> {dog.id} — <strong>Name:</strong> {dog.name} — <strong>Breed:</strong> {dog.breed} — <strong>Color:</strong> {dog.color}</li>))}</ul></div>}
+                {dogsNoOwner.length > 0 && <div><strong>Dogs With No Owner:</strong><ul style={{listStyle: 'none', padding: 0}}>{dogsNoOwner.map(dog => (<li key={dog.id} style={{background: '#f6f8fa', margin: '0.2em 0', padding: '0.5em', borderRadius: '5px'}}><strong>ID:</strong> {dog.id} — <strong>Name:</strong> {dog.name} — <strong>Breed:</strong> {dog.breed} — <strong>Color:</strong> {dog.color}</li>))}</ul></div>}
+                {singleDog && <div style={{marginBottom: '1em'}}><strong>Dog By ID:</strong> <strong>ID:</strong> {singleDog.id} — <strong>Name:</strong> {singleDog.name} — <strong>Breed:</strong> {singleDog.breed} — <strong>Color:</strong> {singleDog.color}</div>}
+                {ownersDogs.length > 0 && <div style={{marginBottom: '1em'}}><strong>Dogs With Owners:</strong><ul style={{listStyle: 'none', padding: 0}}>{ownersDogs.map(dog => <li key={dog.id} style={{background: '#f6f8fa', margin: '0.2em 0', padding: '0.5em', borderRadius: '5px'}}><strong>ID:</strong> {dog.id} — <strong>Name:</strong> {dog.name} — <strong>Owner:</strong> {dog.owner.firstName} {dog.owner.lastName}</li>)}</ul></div>}
+                {paginated && <div style={{marginBottom: '1em'}}><strong>Paginated Dogs:</strong><ul style={{listStyle: 'none', padding: 0}}>{paginated.content.map(dog => <li key={dog.id} style={{background: '#f6f8fa', margin: '0.2em 0', padding: '0.5em', borderRadius: '5px'}}><strong>ID:</strong> {dog.id} — <strong>Name:</strong> {dog.name} — <strong>Breed:</strong> {dog.breed} — <strong>Color:</strong> {dog.color}</li>)}</ul><div>Page {parseInt(paginated.pageNumber) + 1} of {paginated.totalPages}</div></div>}
               </div>
             </Section>
             <Section title="Add Dog">
@@ -327,19 +347,6 @@ function App() {
             </Section>
             {message && <div style={{color: 'green', margin: '1em 0'}}>{message}</div>}
             {error && <div style={{color: 'red', margin: '1em 0'}}>{error}</div>}
-            <Section title="Results">
-              <div style={{marginBottom: '1em'}}>
-                <strong>All Dogs:</strong>
-                <ul style={{listStyle: 'none', padding: 0}}>
-                  {dogs.map(dog => (
-                    <li key={dog.id} style={{background: '#f6f8fa', margin: '0.2em 0', padding: '0.5em', borderRadius: '5px'}}>{dog.name} ({dog.breed}, {dog.color})</li>
-                  ))}
-                </ul>
-              </div>
-              {singleDog && <div style={{marginBottom: '1em'}}><strong>Dog By ID:</strong> {singleDog.name} ({singleDog.breed}, {singleDog.color})</div>}
-              {ownersDogs.length > 0 && <div style={{marginBottom: '1em'}}><strong>Dogs With Owners:</strong><ul style={{listStyle: 'none', padding: 0}}>{ownersDogs.map(dog => <li key={dog.id} style={{background: '#f6f8fa', margin: '0.2em 0', padding: '0.5em', borderRadius: '5px'}}>{dog.name} - Owner: {dog.owner.firstName} {dog.owner.lastName}</li>)}</ul></div>}
-              {paginated && <div style={{marginBottom: '1em'}}><strong>Paginated Dogs:</strong><ul style={{listStyle: 'none', padding: 0}}>{paginated.content.map(dog => <li key={dog.id} style={{background: '#f6f8fa', margin: '0.2em 0', padding: '0.5em', borderRadius: '5px'}}>{dog.name} ({dog.breed}, {dog.color})</li>)}</ul><div>Page {parseInt(paginated.pageNumber) + 1} of {paginated.totalPages}</div></div>}
-            </Section>
           </>
         )}
         {activeTab === 'owners' && (
@@ -359,11 +366,11 @@ function App() {
               <strong>All Owners:</strong>
               <ul style={{listStyle: 'none', padding: 0}}>
                 {owners.map(owner => (
-                  <li key={owner.id} style={{background: '#f6f8fa', margin: '0.2em 0', padding: '0.5em', borderRadius: '5px'}}>{owner.firstName} {owner.lastName} (Age: {owner.age})</li>
+                  <li key={owner.id} style={{background: '#f6f8fa', margin: '0.2em 0', padding: '0.5em', borderRadius: '5px'}}><strong>ID:</strong> {owner.id} — <strong>Name:</strong> {owner.firstName} {owner.lastName} — <strong>Age:</strong> {owner.age}</li>
                 ))}
               </ul>
             </div>
-            {singleOwner && <div style={{marginTop: '1em'}}><strong>Owner By ID:</strong> {singleOwner.firstName} {singleOwner.lastName} (Age: {singleOwner.age})</div>}
+            {singleOwner && <div style={{marginTop: '1em'}}><strong>Owner By ID:</strong> <strong>ID:</strong> {singleOwner.id} — <strong>Name:</strong> {singleOwner.firstName} {singleOwner.lastName} — <strong>Age:</strong> {singleOwner.age}</div>}
           </Section>
         )}
       </main>
