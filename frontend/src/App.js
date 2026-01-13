@@ -55,8 +55,39 @@ function App() {
   const [singleOwner, setSingleOwner] = useState(null);
   const [addOwnerInput, setAddOwnerInput] = useState({ firstName: '', lastName: '', age: '' });
 
+  // Login state
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [loggedInUser, setLoggedInUser] = useState(null);
+  const [loginError, setLoginError] = useState('');
 
   const [activeTab, setActiveTab] = useState('dogs');
+
+  // Login function
+  const handleLogin = async () => {
+    setLoginError('');
+    try {
+      const response = await fetch('http://localhost:8080/graphql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: `mutation { login(username: "${username}", password: "${password}") }` })
+      });
+      const result = await response.json();
+      if (result.data.login) {
+        setLoggedInUser(username);
+        setUsername('');
+        setPassword('');
+      } else {
+        setLoginError('Invalid credentials');
+      }
+    } catch (err) {
+      setLoginError('Login failed');
+    }
+  };
+
+  const handleLogout = () => {
+    setLoggedInUser(null);
+  };
 
   // Fetch all dogs
   const fetchDogs = async () => {
@@ -287,20 +318,40 @@ function App() {
     <div style={{ minHeight: '100vh', background: 'linear-gradient(120deg, #f0f4f8 0%, #e0e7ef 100%)', display: 'flex', flexDirection: 'column', alignItems: 'center', fontFamily: 'Segoe UI, Arial, sans-serif' }}>
       <header style={{ width: '100%', maxWidth: 700, margin: '2em auto 1em auto', textAlign: 'center' }}>
         <h1 style={{ color: '#2a3d66', fontWeight: 700, letterSpacing: 1 }}>Dog & Owner API Demo</h1>
-        <nav style={{ display: 'flex', justifyContent: 'center', gap: '2em', margin: '2em 0 0.5em 0' }}>
-          <button onClick={() => setActiveTab('dogs')} style={{
-            background: activeTab === 'dogs' ? '#2a3d66' : '#e0e7ef',
-            color: activeTab === 'dogs' ? '#fff' : '#2a3d66',
-            border: 'none', borderRadius: '5px', padding: '0.7em 2em', fontWeight: 600, fontSize: '1em', cursor: 'pointer', boxShadow: activeTab === 'dogs' ? '0 2px 8px rgba(42,61,102,0.08)' : 'none'
-          }}>Dogs</button>
-          <button onClick={() => setActiveTab('owners')} style={{
-            background: activeTab === 'owners' ? '#2a3d66' : '#e0e7ef',
-            color: activeTab === 'owners' ? '#fff' : '#2a3d66',
-            border: 'none', borderRadius: '5px', padding: '0.7em 2em', fontWeight: 600, fontSize: '1em', cursor: 'pointer', boxShadow: activeTab === 'owners' ? '0 2px 8px rgba(42,61,102,0.08)' : 'none'
-          }}>Owners</button>
-        </nav>
+
+        <div style={{ background: '#fff', borderRadius: '8px', padding: '1em', marginBottom: '1em', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+          {loggedInUser ? (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1em' }}>
+              <span style={{ color: '#2a3d66', fontWeight: 500 }}>Welcome, {loggedInUser}!</span>
+              <button onClick={handleLogout} style={{ background: '#e74c3c', color: '#fff', border: 'none', borderRadius: '5px', padding: '0.5em 1em', cursor: 'pointer' }}>Logout</button>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5em', flexWrap: 'wrap' }}>
+              <input placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} style={{ padding: '0.5em', borderRadius: '5px', border: '1px solid #ccc' }} />
+              <input placeholder="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} style={{ padding: '0.5em', borderRadius: '5px', border: '1px solid #ccc' }} />
+              <button onClick={handleLogin} style={{ background: '#2a3d66', color: '#fff', border: 'none', borderRadius: '5px', padding: '0.5em 1em', cursor: 'pointer' }}>Login</button>
+              {loginError && <span style={{ color: 'red', marginLeft: '0.5em' }}>{loginError}</span>}
+            </div>
+          )}
+        </div>
+
+        {loggedInUser && (
+          <nav style={{ display: 'flex', justifyContent: 'center', gap: '2em', margin: '2em 0 0.5em 0' }}>
+            <button onClick={() => setActiveTab('dogs')} style={{
+              background: activeTab === 'dogs' ? '#2a3d66' : '#e0e7ef',
+              color: activeTab === 'dogs' ? '#fff' : '#2a3d66',
+              border: 'none', borderRadius: '5px', padding: '0.7em 2em', fontWeight: 600, fontSize: '1em', cursor: 'pointer', boxShadow: activeTab === 'dogs' ? '0 2px 8px rgba(42,61,102,0.08)' : 'none'
+            }}>Dogs</button>
+            <button onClick={() => setActiveTab('owners')} style={{
+              background: activeTab === 'owners' ? '#2a3d66' : '#e0e7ef',
+              color: activeTab === 'owners' ? '#fff' : '#2a3d66',
+              border: 'none', borderRadius: '5px', padding: '0.7em 2em', fontWeight: 600, fontSize: '1em', cursor: 'pointer', boxShadow: activeTab === 'owners' ? '0 2px 8px rgba(42,61,102,0.08)' : 'none'
+            }}>Owners</button>
+          </nav>
+        )}
       </header>
-      <main style={{ width: '100%', maxWidth: 700, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      {loggedInUser && (
+        <main style={{ width: '100%', maxWidth: 700, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         {activeTab === 'dogs' && (
           <>
             <Section title="Fetch Dogs">
@@ -420,6 +471,7 @@ function App() {
           </Section>
         )}
       </main>
+      )}
     </div>
   );
 }
